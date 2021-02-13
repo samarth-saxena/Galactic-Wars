@@ -1,7 +1,3 @@
-PFont font1, font2;
-int astno=5, enemyno=5;
-int counter=1, value=0;
-
 class ship
 {
   PImage shipimg;
@@ -16,6 +12,7 @@ class ship
       shipimg =loadImage("Player1.png");
     else
       shipimg =loadImage("Player2.png");
+    
     sy=y;
     score=0;
     ssize=100;
@@ -24,7 +21,7 @@ class ship
   
   void display()
   {
-    sy=mouseY;
+    //sy=mouseY;
     image(shipimg,sx,sy/id,ssize,ssize);  
   }
   
@@ -44,7 +41,7 @@ class enemy
 {
   PImage enemyimg;
   float ex,ey,speed, esize;
-  
+  boolean control;
   
   enemy()
   {
@@ -54,6 +51,7 @@ class enemy
     counter++;
     esize=100;
     speed=4;
+    control=true;
   }
   
   void display()
@@ -73,7 +71,20 @@ class enemy
       ey=170*counter;
       counter++;
     }
-    
+  }
+  
+  void collision(laser l)
+  {
+   if(((ex + esize) > l1.x) && (ey < (l1.y + 10)) && ((ey + esize) > l1.y) &&  (ex < (l1.x + 80)) )  
+   {
+     if(control==true)
+     {
+       Player1.score+=20;
+       control=false;
+     }
+     else
+       control=true;
+   } 
   }
 }
 
@@ -135,33 +146,45 @@ class laser
     x=Player.sx+Player.ssize;
     y=Player.sy+(Player.ssize/2);
   }
-  void shoot()
+  void shoot(ship Player)
   {
     fill(255,50,0);
-    rect(x,y,80,10,10);
+    rect(x,Player.sy+(Player.ssize/2),80,10,10);
     x+=80;
     if(x>=width)
-      value=0;
+    {
+     x=Player.sx+Player.ssize;
+     value=0;
+    }
   }
   
 }
 
+PFont font1, font2;
+int astno=5, enemyno=4;
+int counter=1, value=0;
+String DataIn;
 ship Player1, Player2;
 enemy [] e1;
 rock [] ast1;
-laser l1;
+laser l1,l2;
+import processing.serial.*; 
+Serial myPort;
 
 void setup()
 {
   fullScreen();
   frameRate(60);
   noCursor();
+  start();
+  myPort = new Serial(this, Serial.list()[0], 9600); 
+  myPort.bufferUntil(10);
   font1=createFont("moonhouse.ttf",50);
-  font2=createFont("Gtek Technology.ttf",50);
   Player1 = new ship(500, 1);
   Player2 = new ship(800, 2);
   l1= new laser(Player1);
-  e1 = new enemy[5];
+  l2= new laser(Player2);
+  e1 = new enemy[4];
   for(int i=0;i<enemyno;i++)
   {
     e1[i]= new enemy(); 
@@ -177,20 +200,21 @@ void draw()
 {
   background(20,20,20);
   heading();
-  Player1.details(200);
-  Player2.details(1500);
+  
   
   if(value==1)
   {
-    l1.shoot();
+    l1.shoot(Player1);
+    l2.shoot(Player2);
   }
-  print(value);
+  
   Player1.display();
   Player2.display();
   for(int i=0;i<enemyno;i++)
   {
     e1[i].display();
     e1[i].move();
+    e1[i].collision(l1);
   }
   for(int i=0;i<astno;i++)
   {
@@ -210,11 +234,35 @@ void mousePressed() {
   }
 }
 
+float sum;
+int abc=0;
+
+void serialEvent(Serial p) 
+{ 
+    DataIn = p.readString();
+    //print(DataIn);
+    if(abc<20)
+  {
+    sum+=int(trim(DataIn));
+    abc++;
+  }
+  else
+  {
+    sum=sum/20;
+    Player1.sy = sum*32.66;
+    abc=0;
+  }
+    //Player1.sy = int(trim(DataIn))*32.66;
+}
 
 void heading()
 {
   textSize(50);
   fill(255);
   textFont(font1);
-  text("INTERSTELLAR WAR",650,60);
+  text("GALACTIC WAR",650,60);
+  Player1.details(200);
+  Player2.details(1500);
 }
+
+void
