@@ -176,10 +176,11 @@ void setup()
   fullScreen();
   frameRate(60);
   noCursor();
-  start();
+  
   myPort = new Serial(this, Serial.list()[0], 9600); 
   myPort.bufferUntil(10);
   font1=createFont("moonhouse.ttf",50);
+  startgame();
   Player1 = new ship(500, 1);
   Player2 = new ship(800, 2);
   l1= new laser(Player1);
@@ -196,12 +197,17 @@ void setup()
   }
 }
 
+int begin=1;
+
 void draw()
 {
+  if(begin==1)
+  {
+    startgame();
+    begin=0;
+  }
   background(20,20,20);
   heading();
-  
-  
   if(value==1)
   {
     l1.shoot(Player1);
@@ -209,7 +215,7 @@ void draw()
   }
   
   Player1.display();
-  Player2.display();
+  //Player2.display();
   for(int i=0;i<enemyno;i++)
   {
     e1[i].display();
@@ -221,7 +227,7 @@ void draw()
     ast1[i].display(); 
     ast1[i].move();
     ast1[i].collision(Player1);
-    ast1[i].collision(Player2);
+    //ast1[i].collision(Player2);
   }
   
 }
@@ -262,7 +268,15 @@ void heading()
   textFont(font1);
   text("GALACTIC WAR",650,60);
   Player1.details(200);
-  Player2.details(1500);
+  //Player2.details(1500);
 }
 
-void
+void startgame()
+{
+  background(20,20,20);
+  fill(255);
+  textFont(font1);
+  textSize(100);
+  text("GALACTIC WAR",750,800);
+  //delay(6000);
+}
