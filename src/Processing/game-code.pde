@@ -1,144 +1,220 @@
-int i, j; 
+PFont font1, font2;
+int astno=5, enemyno=5;
+int counter=1, value=0;
 
-float pheight; //en Y
-float Angle;
-int DistanceUltra;
-int IncomingDistance;
-float Pas; //pour deplacements X
-
-float enemyX;
-float enemyY;
-
-
-
-
-String DataIn; //incoming data
-
-//5 a 32 cm
-
-
-float [] CloudX = new float[6];
-float [] CloudY = new float[6];
-
-//vitesse constante hein
-
-
-PImage Cloud;
-PImage enemy;
-PImage Ship;
-
-
-
-// serial port config
-import processing.serial.*; 
-Serial myPort;    
-
-
-
-//preparation
-void setup() 
+class ship
 {
+  PImage shipimg;
+  float sx,sy, ssize;
+  int score;
+  int id;
+  
 
-    myPort = new Serial(this, Serial.list()[0], 9600); 
-
-
-    myPort.bufferUntil(10);   //end the reception as it detects a carriage return
-
-    frameRate(30); 
-
-    size(1850,1000);
-    rectMode(CORNERS) ; //we give the corners coordinates 
-    noCursor(); //why not ?
-    textSize(16);
-
-    pheight = 300; //initial plane value
-
-
-    Cloud = loadImage("abc.png");  //load a picture
-    enemy = loadImage("enemy.png"); 
-    Ship = loadImage("Ship3.png");
-
-    //int clouds position
-    for  (int i = 1; i <= 5; i = i+1) {
-        CloudX[i]=random(1000);
-        CloudY[i]=random(400);
-    }
+  ship(int y, int a)
+  {
+    if(a==1)  
+      shipimg =loadImage("Player1.png");
+    else
+      shipimg =loadImage("Player2.png");
+    sy=y;
+    score=0;
+    ssize=100;
+    id=a;
+  }
+  
+  void display()
+  {
+    sy=mouseY;
+    image(shipimg,sx,sy/id,ssize,ssize);  
+  }
+  
+  void details(int x)
+  {
+    textFont(font1);
+    textSize(32);
+    if(id==1)
+      fill(0,255,0);
+    else
+      fill(255,0,0);
+    text("PLAYER"+id+": "+score,x,100); 
+  }
 }
 
-
-
-//incoming data event on the serial port
-void serialEvent(Serial p) { 
-    DataIn = p.readString(); 
-    // println(DataIn);
-
-    IncomingDistance = int(trim(DataIn)); //conversion from string to integer
-
-    println(IncomingDistance); //checks....
-
-    if (IncomingDistance>1  && IncomingDistance<30 ) {
-        DistanceUltra = IncomingDistance; //save the value only if its in the range 1 to 100     }
-    }
-}
-
-
-//main drawing loop
-void draw() 
+class enemy
 {
-    background(100,0,0);
-    fill(5, 72, 0);
-
+  PImage enemyimg;
+  float ex,ey,speed, esize;
   
   
-    if (pheight < 30) {
-        pheight=30;
+  enemy()
+  {
+    enemyimg =loadImage("Enemy.png");
+    ex=width;
+    ey=170*counter;
+    counter++;
+    esize=100;
+    speed=4;
+  }
+  
+  void display()
+  {
+    image(enemyimg,ex,ey,esize,esize);  
+  }
+  
+  void move()
+  {
+    ex=ex-speed; 
+    if(ex<-esize)
+    {
+      if(counter>5)
+        counter=1;
+      ex=width;
+      esize=100;
+      ey=170*counter;
+      counter++;
     }
-
-   
-    if (pheight > 880) {
-        pheight=880;
-    }
-
-    TraceAvion(pheight);
     
-
-    enemyX =   enemyX -  cos(radians(Angle))*10;
-
-    if (enemyX < -30) {
-        enemyX=900;
-        enemyY = random(600);
-    }
-
-    //draw and move the clouds
-    for  (int i = 1; i <= 5; i = i+1) {
-        CloudX[i] =   CloudX[i] -  cos(radians(Angle))*(10+2*i);
-
-        image(Cloud, CloudX[i], CloudY[i], 300, 200);
-
-        if (CloudX[i] < -300) {
-            CloudX[i]=1000;
-            CloudY[i] = random(400);
-        }
-    }
-
-    image(enemy, enemyX, enemyY, 59, 38); //displays the useless enemy. 59 and 38 are the size in pixels of the picture
+  }
 }
 
 
-
-void TraceAvion(float Y) {
-    //draw the plane at given position and angle
-
-    noStroke();
-    pushMatrix();
-    translate(400, Y);
-    rotate(radians(90)); //in degres  ! 
-
-image(Ship,0,300,100,100);
- 
- 
-
-    popMatrix();
+class rock 
+{
+  PImage rockimg;
+  float rx,ry,speed,rsize;
+  boolean [] control= new boolean[2];
+  
+  rock() 
+  {
+    rsize=random(60)+100;
+    rx=width;
+    ry=random(height-rsize)+rsize/2;
+    speed=random(9)+7;
+    rockimg=loadImage("ast1.png"); 
+    control[0]=true;
+    control[1]=true;
+  }
+  void display()
+  {
+    image(rockimg,rx,ry,rsize,rsize);
+  }
+  void move()
+  {
+    rx=rx-speed; 
+    if(rx<-rsize)
+    {
+      rx=width;
+      ry=random(height-rsize)+rsize/2;
+      rsize=random(60)+100;
+      speed=random(9)+7;
+    }
+  }
+  void collision(ship Player)
+  {
+   if(((rx + rsize) > Player.sx) && (ry < (Player.sy + Player.ssize)) && ((ry + rsize) > Player.sy) &&  (rx < (Player.sx + Player.ssize)) )  
+   {
+    if(control[Player.id-1])
+    {
+      Player.score-=10;
+      control[Player.id-1]=false;
+    }
+   }
+   else
+   {
+     control[Player.id-1]=true;
+   }
+  }
 }
 
-//file end
+
+class laser
+{
+  float x,y;
+  laser(ship Player)
+  {
+    x=Player.sx+Player.ssize;
+    y=Player.sy+(Player.ssize/2);
+  }
+  void shoot()
+  {
+    fill(255,50,0);
+    rect(x,y,80,10,10);
+    x+=80;
+    if(x>=width)
+      value=0;
+  }
+  
+}
+
+ship Player1, Player2;
+enemy [] e1;
+rock [] ast1;
+laser l1;
+
+void setup()
+{
+  fullScreen();
+  frameRate(60);
+  noCursor();
+  font1=createFont("moonhouse.ttf",50);
+  font2=createFont("Gtek Technology.ttf",50);
+  Player1 = new ship(500, 1);
+  Player2 = new ship(800, 2);
+  l1= new laser(Player1);
+  e1 = new enemy[5];
+  for(int i=0;i<enemyno;i++)
+  {
+    e1[i]= new enemy(); 
+  }
+  ast1 = new rock[astno];
+  for(int i=0;i<astno;i++)
+  {
+    ast1[i]= new rock(); 
+  }
+}
+
+void draw()
+{
+  background(20,20,20);
+  heading();
+  Player1.details(200);
+  Player2.details(1500);
+  
+  if(value==1)
+  {
+    l1.shoot();
+  }
+  print(value);
+  Player1.display();
+  Player2.display();
+  for(int i=0;i<enemyno;i++)
+  {
+    e1[i].display();
+    e1[i].move();
+  }
+  for(int i=0;i<astno;i++)
+  {
+    ast1[i].display(); 
+    ast1[i].move();
+    ast1[i].collision(Player1);
+    ast1[i].collision(Player2);
+  }
+  
+}
+
+void mousePressed() {
+  if (value == 0) {
+    value = 1;
+  } else {
+    value = 0;
+  }
+}
+
+
+void heading()
+{
+  textSize(50);
+  fill(255);
+  textFont(font1);
+  text("INTERSTELLAR WAR",650,60);
+}
