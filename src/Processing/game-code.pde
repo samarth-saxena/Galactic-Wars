@@ -21,7 +21,7 @@ class ship
   
   void display()
   {
-    sy=mouseY;
+    //sy=mouseY;
     image(shipimg,sx,sy/id,ssize,ssize);  
   }
   
@@ -169,8 +169,8 @@ ship Player1, Player2;
 enemy [] e1;
 rock [] ast1;
 laser l1,l2;
-//import processing.serial.*; 
-//Serial myPort;
+import processing.serial.*; 
+Serial myPort;
 
 void setup()
 {
@@ -178,8 +178,8 @@ void setup()
   frameRate(60);
   noCursor();
   
-  //myPort = new Serial(this, Serial.list()[0], 9600); 
-  //myPort.bufferUntil(10);
+  myPort = new Serial(this, "COM3", 9600); 
+  myPort.bufferUntil(10);
   font1=createFont("moonhouse.ttf",50);
   startgame();
   Player1 = new ship(500, 1);
@@ -244,13 +244,16 @@ void mousePressed() {
 float sum;
 int abc=0;
 
-/*void serialEvent(Serial p) 
+void serialEvent(Serial p) 
 { 
     DataIn = p.readString();
     //print(DataIn);
+    int d1=int(trim(DataIn.substring(0,DataIn.indexOf('-'))));
+    //int d2=int(trim(DataIn.substring(DataIn.indexOf('-')+1)));
+    
     if(abc<20)
   {
-    sum+=int(trim(DataIn));
+    sum+=int(d1);
     abc++;
   }
   else
@@ -259,15 +262,16 @@ int abc=0;
     Player1.sy = sum*32.66;
     abc=0;
   }
+  //Player1.fire=d2;
     //Player1.sy = int(trim(DataIn))*32.66;
 }
-*/
+
 void heading()
 {
   textSize(50);
   fill(255);
   textFont(font1);
-  text("GALACTIC WARS",650,60);
+  text("GALACTIC WAR",650,60);
   Player1.details(200);
   //Player2.details(1500);
 }
@@ -279,5 +283,5 @@ void startgame()
   textFont(font1);
   textSize(100);
   text("GALACTIC WARS",750,800);
-  delay(3000);
+  //delay(6000);
 }
