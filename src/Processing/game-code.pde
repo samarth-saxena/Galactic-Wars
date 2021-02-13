@@ -162,6 +162,7 @@ class laser
 }
 
 PFont font1, font2;
+PImage bg;
 int astno=5, enemyno=4;
 int counter=1, value=0;
 String DataIn;
@@ -181,6 +182,7 @@ void setup()
   myPort = new Serial(this, "COM3", 9600); 
   myPort.bufferUntil(10);
   font1=createFont("moonhouse.ttf",50);
+  bg=loadImage("bg.jpg");
   startgame();
   Player1 = new ship(500, 1);
   Player2 = new ship(800, 2);
@@ -271,14 +273,14 @@ void heading()
   textSize(50);
   fill(255);
   textFont(font1);
-  text("GALACTIC WAR",650,60);
+  text("GALACTIC WARs",650,60);
   Player1.details(200);
   //Player2.details(1500);
 }
 
 void startgame()
 {
-  background(20,20,20);
+  background(bg);
   fill(255);
   textFont(font1);
   textSize(100);
