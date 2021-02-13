@@ -2,7 +2,7 @@ class ship
 {
   PImage shipimg;
   float sx,sy, ssize;
-  int score,fire;
+  int score;
   int id;
   
 
@@ -12,7 +12,7 @@ class ship
       shipimg =loadImage("Player1.png");
     else
       shipimg =loadImage("Player2.png");
-    fire=0;
+    
     sy=y;
     score=0;
     ssize=100;
@@ -21,7 +21,7 @@ class ship
   
   void display()
   {
-    //sy=mouseY;
+    sy=mouseY;
     image(shipimg,sx,sy/id,ssize,ssize);  
   }
   
@@ -82,9 +82,10 @@ class enemy
        Player1.score+=20;
        control=false;
      }
-     else
-       control=true;
-   } 
+   }
+   else
+      control=true;
+   
   }
 }
 
@@ -154,7 +155,7 @@ class laser
     if(x>=width)
     {
      x=Player.sx+Player.ssize;
-     Player1.fire=0;
+     value=0;
     }
   }
   
@@ -168,8 +169,8 @@ ship Player1, Player2;
 enemy [] e1;
 rock [] ast1;
 laser l1,l2;
-import processing.serial.*; 
-Serial myPort;
+//import processing.serial.*; 
+//Serial myPort;
 
 void setup()
 {
@@ -177,8 +178,8 @@ void setup()
   frameRate(60);
   noCursor();
   
-  myPort = new Serial(this, Serial.list()[0], 9600); 
-  myPort.bufferUntil(10);
+  //myPort = new Serial(this, Serial.list()[0], 9600); 
+  //myPort.bufferUntil(10);
   font1=createFont("moonhouse.ttf",50);
   startgame();
   Player1 = new ship(500, 1);
@@ -208,7 +209,7 @@ void draw()
   }
   background(20,20,20);
   heading();
-  if(Player1.fire==1)
+  if(value==1)
   {
     l1.shoot(Player1);
     //l2.shoot(Player2);
@@ -232,27 +233,24 @@ void draw()
   
 }
 
-/*void mousePressed() {
+void mousePressed() {
   if (value == 0) {
     value = 1;
   } else {
     value = 0;
   }
-}*/
+}
 
 float sum;
 int abc=0;
 
-void serialEvent(Serial p) 
+/*void serialEvent(Serial p) 
 { 
     DataIn = p.readString();
     //print(DataIn);
-    int d1=int(trim(DataIn.substring(0,DataIn.indexOf('-'))));
-    //int d2=int(trim(DataIn.substring(DataIn.indexOf('-')+1)));
-    
     if(abc<20)
   {
-    sum+=int(d1);
+    sum+=int(trim(DataIn));
     abc++;
   }
   else
@@ -261,16 +259,15 @@ void serialEvent(Serial p)
     Player1.sy = sum*32.66;
     abc=0;
   }
-  //Player1.fire=d2;
     //Player1.sy = int(trim(DataIn))*32.66;
 }
-
+*/
 void heading()
 {
   textSize(50);
   fill(255);
   textFont(font1);
-  text("GALACTIC WAR",650,60);
+  text("GALACTIC WARS",650,60);
   Player1.details(200);
   //Player2.details(1500);
 }
@@ -281,6 +278,6 @@ void startgame()
   fill(255);
   textFont(font1);
   textSize(100);
-  text("GALACTIC WAR",750,800);
-  delay(6000);
+  text("GALACTIC WARS",750,800);
+  delay(3000);
 }
